@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en-IE">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Softstage: find open mics that fit your senses (fictional student project)</title>
+<meta name="description" content="Softstage is a fictional student project: a sensory-friendly open mic finder for autistic performers in Dublin. Every session shown is invented Sample Data.">
+<style>
+/* ================= Design tokens (same as the demo page) ================= */
+:root {
+  --ink: #2e1347;
+  --ink-soft: #4b3563;
+  --purple: #6b2d91;
+  --purple-dark: #4a1d6e;
+  --bg: #fff6fb;
+  --pink: #f8b4d4;
+  --pink-hover: #f29bc4;
+  --pink-pale: #ffe0ef;
+  --lav: #efe6f8;
+  --line: #d9c4ea;
+  --white: #ffffff;
+  --gold: #d4a017;
+  --gold-soft: #f0cf63;
+  --green-bg: #dcf4e2; --green-ink: #0e4a1f; --green-bd: #2f8a4a;
+  --amber-bg: #fff0c2; --amber-ink: #5c3b00; --amber-bd: #b97a00;
+  --red-bg: #ffdad5;   --red-ink: #7a140c;   --red-bd: #c0392b;
+
+  /* small drawn icons used as list markers (decorative, so they are not read out) */
+  --check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%23dcf4e2' stroke='%232f8a4a' stroke-width='2'/%3E%3Cpath d='M7 12.5l3.2 3.2L17 8.8' fill='none' stroke='%230e4a1f' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --clock: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%23efe6f8' stroke='%236b2d91' stroke-width='2' stroke-dasharray='3 2'/%3E%3Cpath d='M12 6.5V12l3.5 2' fill='none' stroke='%234a1d6e' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+[hidden] { display: none !important; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 1.125rem;          /* 18px */
+  line-height: 1.75;
+  letter-spacing: 0.02em;
+  word-spacing: 0.06em;
+  color: var(--ink);
+  background: var(--bg);
+  text-align: left;
+}
+
+em, i, cite, address, dfn, var { font-style: normal; }
+p { margin: 0 0 1.25em; max-width: 62ch; }
+h1, h2, h3, h4 { line-height: 1.3; margin: 0 0 0.6em; font-weight: 700; text-transform: none; }
+h1 { font-size: 1.9rem; margin-bottom: 0.4em; }
+h2 { font-size: 1.7rem; }
+h3 { font-size: 1.3rem; }
+a { color: var(--purple-dark); }
+ul, ol { margin: 0 0 1.25em; padding-left: 1.3em; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* ================= Focus, skip link ================= */
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+.skip-link {
+  position: absolute; left: 8px; top: -100px; z-index: 100;
+  background: var(--purple-dark); color: #fff; padding: 12px 18px; border-radius: 10px;
+}
+.skip-link:focus { top: 8px; }
+
+/* ================= Calm decorative sparkle (page edges and headings only) ================= */
+.sparkle-edge {
+  position: fixed; top: 0; bottom: 0; width: 22px; z-index: 0; pointer-events: none;
+  background-image: var(--sparkle-tile);
+  background-repeat: repeat-y;
+  background-size: 22px 120px;
+  animation: edgeFade 10s ease-in-out infinite alternate;
+}
+.sparkle-edge.left  { left: 0; }
+.sparkle-edge.right { right: 0; }
+@keyframes edgeFade { from { opacity: 0.6; } to { opacity: 0.95; } }
+
+.sparkle-heading::before,
+.sparkle-heading::after {
+  content: ""; display: inline-block; width: 0.7em; height: 0.7em;
+  background: var(--star-icon) center / contain no-repeat;
+  vertical-align: -0.05em;
+}
+.sparkle-heading::before { margin-right: 0.4em; }
+.sparkle-heading::after  { margin-left: 0.4em; }
+
+/* ================= Page layout ================= */
+.page { position: relative; z-index: 1; max-width: 1040px; margin: 0 auto; padding: 0 30px 56px; }
+
+.banner {
+  margin: 20px 0 20px; padding: 16px 20px;
+  background: var(--lav); border: 2px solid var(--purple); border-radius: 14px;
+}
+.banner p { margin: 0; max-width: none; }
+
+.topbar { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; justify-content: space-between; margin: 0 0 8px; }
+.wordmark { display: inline-flex; align-items: center; gap: 12px; font-size: 1.6rem; font-weight: 700; color: var(--purple-dark); margin: 0; max-width: none; }
+.wordmark svg { display: block; flex: 0 0 auto; }
+
+.page-nav { margin: 0 0 56px; }
+.page-nav ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 6px; }
+.page-nav a {
+  display: inline-flex; align-items: center; min-height: 44px; padding: 4px 12px;
+  border-radius: 10px; font-weight: 600; text-decoration: none;
+  border: 2px solid transparent;
+}
+.page-nav a:hover { background: var(--pink-pale); border-color: var(--line); text-decoration: underline; }
+
+section { margin: 0 0 56px; }
+.section-lead { font-size: 1.15rem; }
+
+/* ================= Buttons ================= */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 48px; padding: 8px 22px; font: inherit; font-weight: 700; letter-spacing: inherit;
+  border-radius: 12px; border: 2px solid var(--purple); cursor: pointer;
+  background: var(--pink); color: var(--ink); text-decoration: none;
+}
+.btn:hover { background: var(--pink-hover); border-color: var(--purple-dark); }
+.btn-secondary { background: #fff; color: var(--purple-dark); }
+.btn-secondary:hover { background: var(--pink-pale); color: var(--purple-dark); border-color: var(--purple); }
+.btn-large { min-height: 56px; padding: 10px 32px; font-size: 1.2rem; }
+.cta-note { margin: 12px 0 0; font-size: 1rem; color: var(--ink-soft); }
+
+/* ================= Hero ================= */
+.hero { display: grid; gap: 36px; margin-bottom: 64px; padding-top: 12px; }
+.fiction-label {
+  display: inline-block; margin: 0 0 16px; padding: 0 14px; background: #fff; color: var(--ink);
+  border: 2px solid var(--gold); border-radius: 999px; font-size: 1rem; font-weight: 600; line-height: 1.7;
+}
+.hero-tagline { font-size: 1.45rem; font-weight: 600; color: var(--purple-dark); margin: 0 0 0.5em; }
+.hero-mission { font-size: 1.2rem; margin: 0 0 0.8em; }
+.hero-sub { margin: 0 0 1.5em; }
+.hero-for { font-size: 1rem; color: var(--ink-soft); margin: 1.5em 0 0; }
+.hero-card-wrap { max-width: 26rem; }
+.hero-card-wrap figcaption, .figcaption { font-size: 1rem; color: var(--ink-soft); margin-top: 10px; }
+.hero-card-wrap { margin: 0; }
+
+/* ================= Panels ================= */
+.panel {
+  background: #fff; border: 2px solid var(--line); border-radius: 16px;
+  padding: 22px 24px; margin: 0 0 24px;
+}
+.panel > :last-child { margin-bottom: 0; }
+.note-box { padding: 12px 16px; background: var(--lav); border: 2px solid var(--line); border-radius: 12px; max-width: none; }
+
+/* ================= Session card (same look as the demo) ================= */
+.card {
+  background: #fff; border: 2px solid var(--line); border-radius: 16px; overflow: hidden;
+  display: flex; flex-direction: column;
+}
+.card-img { position: relative; height: 130px; background: linear-gradient(135deg, #fbd3e6, #e6d4f5); }
+.sample-tag {
+  position: absolute; top: 10px; left: 10px; background: #fff; color: var(--ink);
+  border: 2px solid var(--gold); border-radius: 999px; padding: 0 12px;
+  font-size: 1rem; font-weight: 600; line-height: 1.6;
+}
+.card-body { padding: 16px 20px 20px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
+.card-title { margin: 0; font-size: 1.3rem; font-weight: 700; line-height: 1.3; }
+.facts { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; margin: 0; }
+.facts dt { font-weight: 700; }
+.facts dd { margin: 0; }
+.ratings { border-top: 2px dashed var(--line); padding-top: 12px; display: grid; gap: 10px; }
+.rating { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+.rating-title { font-weight: 700; min-width: 5.5rem; }
+.light-label { font-size: 1rem; }
+
+.pill {
+  display: inline-flex; align-items: center; gap: 8px; padding: 4px 14px;
+  border-radius: 999px; border: 2px solid; font-weight: 700; font-size: 1rem; line-height: 1.5;
+}
+.pill .dot { width: 12px; height: 12px; border-radius: 50%; background: currentColor; flex: 0 0 12px; }
+.pill-green { background: var(--green-bg); color: var(--green-ink); border-color: var(--green-bd); }
+.bulbs { display: inline-flex; gap: 4px; vertical-align: middle; }
+.bulbs svg { display: block; }
+.quiet-chip {
+  display: inline-flex; align-items: center; gap: 8px; padding: 2px 16px 2px 6px;
+  border-radius: 999px; border: 2px solid var(--purple); background: var(--lav);
+  font-weight: 700; font-size: 1rem; line-height: 1.5; color: var(--ink);
+}
+.quiet-chip svg { display: block; width: 36px; height: 36px; flex: 0 0 36px; }
+
+/* ================= Problem ================= */
+.quote {
+  margin: 0 0 24px; padding: 20px 24px; background: #fff;
+  border: 2px solid var(--line); border-left: 8px solid var(--pink); border-radius: 16px;
+}
+.quote p { margin: 0; max-width: none; font-size: 1.25rem; }
+.quote .quote-label { margin-top: 12px; font-size: 1rem; font-weight: 600; color: var(--ink-soft); }
+.who { display: grid; gap: 14px; margin: 0; }
+.who > div { background: #fff; border: 2px solid var(--line); border-radius: 14px; padding: 14px 18px; }
+.who dt { font-weight: 700; color: var(--purple-dark); }
+.who dd { margin: 0; }
+
+/* ================= Needs list ================= */
+.needs { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.needs li {
+  position: relative; background: #fff; border: 2px solid var(--line); border-radius: 14px;
+  padding: 12px 18px 12px 62px;
+}
+.needs li::before {
+  content: ""; position: absolute; left: 18px; top: 15px; width: 28px; height: 28px;
+  background: var(--check) center / contain no-repeat;
+}
+.needs li.planned { border-style: dashed; border-color: var(--purple); background: var(--lav); }
+.needs li.planned::before { background-image: var(--clock); }
+.needs .tag { margin-right: 10px; }
+
+.status {
+  display: inline-flex; align-items: center; gap: 8px; padding: 2px 12px;
+  border-radius: 999px; border: 2px solid; font-weight: 700; font-size: 1rem; line-height: 1.6;
+  white-space: nowrap;
+}
+.status svg { width: 18px; height: 18px; flex: 0 0 18px; }
+.status-demo { background: var(--green-bg); color: var(--green-ink); border-color: var(--green-bd); }
+.status-planned { background: var(--lav); color: var(--purple-dark); border: 2px dashed var(--purple); }
+
+/* ================= Steps ================= */
+.steps { list-style: none; margin: 0 0 28px; padding: 0; display: grid; gap: 18px; }
+.step { background: #fff; border: 2px solid var(--line); border-radius: 16px; padding: 20px 22px; }
+.step h3 { display: flex; align-items: center; gap: 12px; margin-bottom: 0.5em; }
+.step-num {
+  display: inline-flex; align-items: center; justify-content: center; flex: 0 0 40px;
+  width: 40px; height: 40px; border-radius: 50%; background: var(--pink);
+  border: 2px solid var(--purple); color: var(--ink); font-weight: 700;
+}
+.step p { margin: 0 0 0.8em; }
+.step p:last-child { margin-bottom: 0; }
+
+/* ================= Requirements table ================= */
+.fit { width: 100%; border-collapse: separate; border-spacing: 0; background: #fff; border: 2px solid var(--line); border-radius: 16px; overflow: hidden; }
+.fit th, .fit td { padding: 14px 16px; text-align: left; vertical-align: top; border-bottom: 2px solid var(--line); }
+.fit thead th { background: var(--lav); font-weight: 700; }
+.fit tbody tr:last-child th, .fit tbody tr:last-child td { border-bottom: 0; }
+.fit tbody th { font-weight: 700; width: 24%; }
+.fit td:nth-child(2) { width: 52%; }
+
+/* ================= Alternatives ================= */
+.compare { display: grid; gap: 22px; margin-bottom: 24px; }
+.compare .panel { margin: 0; }
+.compare h3 { margin-bottom: 0.2em; }
+.checked { font-size: 1rem; color: var(--ink-soft); margin: 0 0 1em; font-weight: 600; }
+.compare ul { padding-left: 1.2em; }
+.compare li { margin-bottom: 0.5em; }
+.gap-note { background: var(--lav); border: 2px solid var(--purple); border-radius: 14px; padding: 14px 18px; }
+
+/* ================= Funding ================= */
+.pay { display: grid; gap: 22px; margin-bottom: 20px; }
+.pay .panel { margin: 0; }
+.price { font-size: 1.8rem; font-weight: 700; color: var(--purple-dark); margin: 0 0 0.2em; line-height: 1.3; }
+.assume { display: inline-block; padding: 2px 12px; border: 2px dashed var(--purple); border-radius: 10px; background: var(--lav); font-weight: 700; font-size: 1rem; }
+
+/* ================= Testers ================= */
+.testers { border: 2px dashed var(--purple); background: #fff; border-radius: 16px; padding: 22px 24px; }
+.testers > :last-child { margin-bottom: 0; }
+
+/* ================= Form ================= */
+.field { margin: 0 0 22px; }
+.lbl { display: block; font-weight: 700; margin-bottom: 6px; }
+input[type="email"] {
+  width: 100%; max-width: 28rem; min-height: 48px; padding: 8px 12px;
+  font: inherit; letter-spacing: inherit; color: var(--ink); background: #fff;
+  border: 2px solid var(--purple); border-radius: 10px;
+}
+.hint { margin: 0 0 10px; font-size: 1rem; color: var(--ink-soft); }
+.errors {
+  border: 2px solid var(--red-bd); background: var(--red-bg); color: var(--red-ink);
+  border-radius: 12px; padding: 12px 18px; margin: 0 0 22px; font-weight: 700; max-width: 40rem;
+}
+
+.thanks {
+  position: relative; overflow: hidden; margin: 0 0 24px; padding: 20px 22px;
+  background: #fff; border: 3px solid var(--gold); border-radius: 16px;
+}
+.thanks > :last-child { margin-bottom: 0; }
+.thanks-emoji { font-size: 1.6rem; margin: 0 0 0.3em; line-height: 1.4; }
+.thanks.shimmer::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(110deg, transparent 30%, rgba(240, 207, 99, 0.35) 50%, transparent 70%);
+  transform: translateX(-100%);
+  animation: shimmer 2s ease-in-out 1 forwards;
+}
+@keyframes shimmer { to { transform: translateX(100%); } }
+
+/* ================= Footer ================= */
+.site-footer { border-top: 2px solid var(--line); padding-top: 22px; margin-top: 12px; }
+.site-footer .closing { font-weight: 600; color: var(--purple-dark); font-size: 1.2rem; }
+
+/* ================= Wider screens ================= */
+@media (min-width: 760px) {
+  h1 { font-size: 2.6rem; }
+  .steps { grid-template-columns: repeat(3, 1fr); }
+  .compare { grid-template-columns: 1fr 1fr; }
+  .pay { grid-template-columns: 1fr 1fr; }
+  .who { grid-template-columns: repeat(3, 1fr); }
+}
+@media (min-width: 900px) {
+  .hero { grid-template-columns: 1.15fr 0.85fr; align-items: center; gap: 48px; }
+}
+
+/* ================= Phone: the table becomes stacked cards ================= */
+@media (max-width: 759px) {
+  .fit, .fit tbody, .fit tr, .fit th, .fit td { display: block; width: 100%; }
+  .fit { border: 0; background: transparent; border-radius: 0; }
+  .fit thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .fit tbody tr { background: #fff; border: 2px solid var(--line); border-radius: 16px; margin: 0 0 18px; overflow: hidden; }
+  .fit tbody th { width: 100%; background: var(--lav); border-bottom: 2px solid var(--line); }
+  .fit tbody td { width: 100%; border-bottom: 0; padding-top: 10px; padding-bottom: 6px; }
+  .fit tbody tr:last-child th { border-bottom: 2px solid var(--line); }
+  .fit td::before { content: attr(data-label); display: block; font-weight: 700; color: var(--purple-dark); font-size: 1rem; margin-bottom: 2px; }
+  .fit td:last-child { padding-bottom: 16px; }
+  .fit td:nth-child(2) { width: 100%; }
+  .page { padding: 0 28px 48px; }
+}
+
+/* ================= Calm mode and reduced motion ================= */
+body.calm .sparkle-edge,
+body.calm .deco { display: none !important; }
+body.calm .sparkle-heading::before,
+body.calm .sparkle-heading::after { display: none; }
+body.calm *, body.calm *::before, body.calm *::after { animation: none !important; transition: none !important; }
+body.calm .thanks::after { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  .thanks::after { display: none; }
+}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<div class="sparkle-edge left" aria-hidden="true"></div>
+<div class="sparkle-edge right" aria-hidden="true"></div>
+
+<!-- Shared bulb drawings, used by the example session card -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="bulb-on" viewBox="0 0 24 32">
+      <path d="M12 2a8 8 0 0 0-4.6 14.5c.9.7 1.4 1.6 1.4 2.5V21h6.4v-2c0-.9.5-1.8 1.4-2.5A8 8 0 0 0 12 2z" fill="#f5cf4a" stroke="#6b4a00" stroke-width="1.6" stroke-linejoin="round"/>
+      <rect x="9" y="23" width="6" height="3.5" rx="1" fill="#6b4a00"/>
+    </symbol>
+    <symbol id="bulb-off" viewBox="0 0 24 32">
+      <path d="M12 2a8 8 0 0 0-4.6 14.5c.9.7 1.4 1.6 1.4 2.5V21h6.4v-2c0-.9.5-1.8 1.4-2.5A8 8 0 0 0 12 2z" fill="#ffffff" stroke="#6f5a85" stroke-width="1.6" stroke-linejoin="round" stroke-dasharray="3 2"/>
+      <rect x="9" y="23" width="6" height="3.5" rx="1" fill="#6f5a85"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="page">
+  <div class="banner" role="note">
+    <p><strong>This is a fictional student project.</strong> All sessions, venues, quotes and prices on this page are invented, and the sessions are Sample Data. No real data is collected.</p>
+  </div>
+
+  <div class="topbar">
+    <p class="wordmark">
+      <svg width="30" height="44" viewBox="0 0 30 44" aria-hidden="true" focusable="false">
+        <rect x="3" y="2" width="24" height="40" rx="8" fill="#ffffff" stroke="#6b2d91" stroke-width="2.5"/>
+        <rect x="12" y="8" width="6" height="28" rx="3" fill="#efe6f8" stroke="#6b2d91" stroke-width="1.5"/>
+        <rect x="7" y="13" width="16" height="9" rx="4" fill="#f8b4d4" stroke="#6b2d91" stroke-width="2"/>
+      </svg>
+      <span>Softstage</span>
+    </p>
+    <button type="button" id="calm-toggle" class="btn btn-secondary" aria-pressed="false" hidden>Calm mode: Off</button>
+  </div>
+
+  <main id="main" tabindex="-1">
+
+    <!-- ================= 1. HERO ================= -->
+    <section class="hero" aria-labelledby="hero-heading">
+      <div>
+        <p class="fiction-label">Fictional student project</p>
+        <h1 id="hero-heading">Find open mics that fit your senses, before you leave the house.</h1>
+        <p class="hero-tagline">A dimmer switch for the world</p>
+        <p class="hero-mission">Helping neurodivergent performers find open mics that fit their senses.</p>
+        <p class="hero-sub">Softstage lists open mic sessions with a noise rating and a lighting rating, so you can pick a night that suits you.</p>
+        <p><a class="btn btn-large" href="https://sarah-19970108.github.io/Softstage_Demo/">Try the demo</a></p>
+        <p class="cta-note">Opens the demo page. Everything in it is invented Sample Data.</p>
+        <p class="hero-for">Built first for autistic performers aged 20 to 35 in Dublin who want to try singing, dance or spoken word.</p>
+      </div>
+
+      <figure class="hero-card-wrap">
+        <article class="card" aria-labelledby="ex-title">
+          <div class="card-img">
+            <svg viewBox="0 0 320 130" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
+              <path class="deco" transform="translate(22 18) scale(.9)" fill="#d4a017" d="M10 0Q10.9 9.1 20 10Q10.9 10.9 10 20Q9.1 10.9 0 10Q9.1 9.1 10 0Z"/>
+              <path class="deco" transform="translate(284 92) scale(.7)" fill="#d4a017" d="M10 0Q10.9 9.1 20 10Q10.9 10.9 10 20Q9.1 10.9 0 10Q9.1 9.1 10 0Z"/>
+              <path class="deco" transform="translate(272 14) scale(.5)" fill="#f0cf63" d="M10 0Q10.9 9.1 20 10Q10.9 10.9 10 20Q9.1 10.9 0 10Q9.1 9.1 10 0Z"/>
+              <g transform="translate(124 29) scale(1.5)">
+                <rect x="17" y="5" width="14" height="25" rx="7" fill="#4a1d6e"/>
+                <path d="M10 23a14 14 0 0 0 28 0M24 37v7M16 44h16" fill="none" stroke="#4a1d6e" stroke-width="3.5" stroke-linecap="round"/>
+              </g>
+            </svg>
+            <span class="sample-tag">Sample Data</span>
+          </div>
+          <div class="card-body">
+            <p class="card-title" id="ex-title">Winter Words Evening</p>
+            <dl class="facts">
+              <dt>Date</dt><dd>Wed 16 Dec 2026</dd>
+              <dt>Time</dt><dd>19:00</dd>
+              <dt>Where</dt><dd>The Old Mill Room, Dublin 2</dd>
+              <dt>Accepts</dt><dd>Spoken word</dd>
+            </dl>
+            <div class="ratings">
+              <div class="rating">
+                <span class="rating-title">Noise</span>
+                <span class="pill pill-green"><span class="dot" aria-hidden="true"></span>Low noise</span>
+              </div>
+              <div class="rating">
+                <span class="rating-title">Lighting</span>
+                <span class="bulbs" aria-hidden="true">
+                  <svg width="26" height="34" viewBox="0 0 24 32" focusable="false"><use href="#bulb-on"/></svg>
+                  <svg width="26" height="34" viewBox="0 0 24 32" focusable="false"><use href="#bulb-on"/></svg>
+                  <svg width="26" height="34" viewBox="0 0 24 32" focusable="false"><use href="#bulb-off"/></svg>
+                </span>
+                <span class="light-label">Moderate light (2 of 3 bulbs)</span>
+              </div>
+              <div class="rating">
+                <span class="rating-title">Quiet space</span>
+                <span class="quiet-chip"><svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><circle cx="24" cy="24" r="22" fill="#4a1d6e"/><circle cx="16.5" cy="14.5" r="2.4" fill="#ffffff"/><circle cx="31.5" cy="14.5" r="2.4" fill="#ffffff"/><g transform="translate(19.5 21.5) rotate(-32)"><path d="M-3.4 12L-3.4 3a2.4 2.4 0 0 1 4.8 0L1.4 8.2L7 8.6a3 3 0 0 1 3 3L10 17a4 4 0 0 1-4 4L-1 21a4 4 0 0 1-4-4Z" fill="#ffffff"/><path d="M3.2 12.2v3.6M6.4 12.2v3.6" fill="none" stroke="#4a1d6e" stroke-width="1.2" stroke-linecap="round"/></g></g></svg><span>Available</span></span>
+              </div>
+            </div>
+          </div>
+        </article>
+        <figcaption>An example session card from the demo. The session is invented Sample Data.</figcaption>
+      </figure>
+    </section>
+
+    <nav class="page-nav" aria-label="On this page">
+      <ul>
+        <li><a href="#problem">The problem</a></li>
+        <li><a href="#needs">What performers need</a></li>
+        <li><a href="#how">How it works</a></li>
+        <li><a href="#met">Requirements met</a></li>
+        <li><a href="#exists">What exists already</a></li>
+        <li><a href="#paid">How it is paid for</a></li>
+        <li><a href="#testers">What testers said</a></li>
+      </ul>
+    </nav>
+
+    <!-- ================= 2. THE PROBLEM ================= -->
+    <section id="problem" aria-labelledby="problem-heading">
+      <h2 id="problem-heading" class="sparkle-heading">The problem</h2>
+      <p class="section-lead">Autistic performers cannot tell beforehand whether an open mic's noise or lighting will be manageable.</p>
+      <p>So they skip events, or they ask someone to check the room first. Either way, they lose chances to perform.</p>
+      <blockquote class="quote">
+        <p>&ldquo;I would love to go, but I cannot tell if it will be too loud or too bright until I am already inside.&rdquo;</p>
+        <p class="quote-label">Invented quote, written for this project. It is not from a real person.</p>
+      </blockquote>
+      <dl class="who">
+        <div>
+          <dt>Who it is for</dt>
+          <dd>The performer. They are the user.</dd>
+        </div>
+        <div>
+          <dt>Who pays</dt>
+          <dd>The inclusive arts club or organiser. They are the customer.</dd>
+        </div>
+        <div>
+          <dt>Who uses it day to day</dt>
+          <dd>The performer. Organisers use the Venue view to add and rate sessions.</dd>
+        </div>
+      </dl>
+    </section>
+
+    <!-- ================= 3. WHAT PERFORMERS NEED ================= -->
+    <section id="needs" aria-labelledby="needs-heading">
+      <h2 id="needs-heading" class="sparkle-heading">What performers need</h2>
+      <p class="section-lead">Six things the demo does.</p>
+      <ul class="needs">
+        <li>Show a <strong>noise rating</strong> (green, amber or red) on each session, with a clear key.</li>
+        <li>Show a <strong>lighting rating</strong> (one to three bulbs) on each session, with a clear key.</li>
+        <li><strong>Filter</strong> by performance type, noise and lighting together, with a clear message when nothing matches.</li>
+        <li>Show each session as a <strong>card</strong> with an image, location, date, time, performance types and both ratings.</li>
+        <li>Give venues a <strong>guide</strong> so they rate sessions the same way.</li>
+        <li>Show whether a <strong>quiet space</strong> is available, with a clear key.</li>
+      </ul>
+    </section>
+
+    <!-- ================= 4. HOW IT WORKS ================= -->
+    <section id="how" aria-labelledby="how-heading">
+      <h2 id="how-heading" class="sparkle-heading">What it is, and how it works in three steps</h2>
+      <p class="section-lead"><strong>Softstage is a listing portal:</strong> a searchable directory of open mic sessions. Performers browse and filter it. Venues add sessions to it and rate them.</p>
+      <p>It is made to be used on a phone: one column, large buttons, plain words, and a Calm mode that switches the sparkle off.</p>
+      <ol class="steps" role="list">
+        <li class="step">
+          <h3><span class="step-num" aria-hidden="true">1</span>Browse session cards</h3>
+          <p>Each card shows where and when the session is, which kinds of performance it takes, and how loud and how bright it will be.</p>
+        </li>
+        <li class="step">
+          <h3><span class="step-num" aria-hidden="true">2</span>Filter by type, noise and lighting</h3>
+          <p>Choose the performance types you want, then the loudest and brightest you can manage. You can also ask for sessions with a quiet space. Sessions over your limits are hidden.</p>
+        </li>
+        <li class="step">
+          <h3><span class="step-num" aria-hidden="true">3</span>Choose a session and register interest</h3>
+          <p>Pick a session that fits and read its details before you decide.</p>
+          <p><span class="status status-planned"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Planned</span></p>
+          <p>Registering interest is not in the demo yet.</p>
+        </li>
+      </ol>
+      <p><a class="btn btn-large" href="https://sarah-19970108.github.io/Softstage_Demo/">Try the demo</a></p>
+    </section>
+
+    <!-- ================= 5. HOW EACH REQUIREMENT IS MET ================= -->
+    <section id="met" aria-labelledby="met-heading">
+      <h2 id="met-heading" class="sparkle-heading">How each requirement is met</h2>
+      <p class="section-lead">Every claim here is true of the demo, or it is marked Planned.</p>
+      <table class="fit">
+        <caption class="sr-only">Each requirement, how the solution meets it, and whether it is in the demo or planned</caption>
+        <thead>
+          <tr>
+            <th scope="col">Requirement</th>
+            <th scope="col">How the solution meets it</th>
+            <th scope="col">In the demo or Planned</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">1. Noise rating with a clear key</th>
+            <td data-label="How the solution meets it">Every session card shows a green, amber or red pill, and says Low noise, Moderate noise or Lots of noise in words. A noise key at the top of the Performer view explains each colour. If a venue has not supplied a rating, the card says so.</td>
+            <td data-label="In the demo or Planned"><span class="status status-demo"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>In the demo</span></td>
+          </tr>
+          <tr>
+            <th scope="row">2. Lighting rating with a clear key</th>
+            <td data-label="How the solution meets it">Every session card shows one, two or three lit bulbs with a plain label, such as Low light (1 of 3 bulbs). A lighting key explains each level, including that three bulbs can mean flashing or changing light.</td>
+            <td data-label="In the demo or Planned"><span class="status status-demo"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>In the demo</span></td>
+          </tr>
+          <tr>
+            <th scope="row">3. Filter by performance type, noise and lighting together</th>
+            <td data-label="How the solution meets it">Tick the performance types you want, then choose the loudest and brightest you can manage. All three apply at once, and you can add Only show sessions with a quiet space. If nothing fits, a message says so and offers a Clear filters button. While a limit is set, sessions with missing details are hidden, and a note says how many.</td>
+            <td data-label="In the demo or Planned"><span class="status status-demo"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>In the demo</span></td>
+          </tr>
+          <tr>
+            <th scope="row">4. Session cards</th>
+            <td data-label="How the solution meets it">Each session is a card with an illustration, the location, the date, the time, the performance types it accepts, and both ratings. Where the venue has a quiet space, the card also shows the quiet space symbol.</td>
+            <td data-label="In the demo or Planned"><span class="status status-demo"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>In the demo</span></td>
+          </tr>
+          <tr>
+            <th scope="row">5. A guide so venues rate sessions the same way</th>
+            <td data-label="How the solution meets it">The Venue view has a How to rate your session guide that uses the same keys as the Performer view. Organisers add a session there. If they leave a rating blank, a warning badge appears on that session as its date gets closer.</td>
+            <td data-label="In the demo or Planned"><span class="status status-demo"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>In the demo</span></td>
+          </tr>
+          <tr>
+            <th scope="row">6. Show whether a quiet space is available</th>
+            <td data-label="How the solution meets it">A card shows a small symbol of a round face with a finger to the lips, and the words Quiet space, only when the venue has one. Cards without a quiet space show nothing. A Quiet space key explains the symbol, venues tick a box when they add a session, and a filter shows only sessions with a quiet space.</td>
+            <td data-label="In the demo or Planned"><span class="status status-demo"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>In the demo</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ================= 6. WHAT EXISTS ALREADY ================= -->
+    <section id="exists" aria-labelledby="exists-heading">
+      <h2 id="exists-heading" class="sparkle-heading">What exists already</h2>
+      <p class="section-lead">Two real alternatives, and what they leave out for a performer.</p>
+      <div class="compare">
+        <div class="panel">
+          <h3><a href="https://www.euansguide.com/">Euan's Guide</a></h3>
+          <p class="checked">External site. Checked on 22 October 2026.</p>
+          <p>A charity-run review site where disabled visitors rate venues for access.</p>
+          <ul>
+            <li>Dublin venues are listed, but the information comes from visitor reviews.</li>
+            <li>For example, one Laughter Lounge review from July 2022 covers physical access and says nothing about noise or lighting.</li>
+            <li>It describes venues for audiences, not sessions, and has no filter for performers.</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <h3><a href="https://www.eventbrite.ie/d/ireland/autism/">Eventbrite</a></h3>
+          <p class="checked">External site. Checked on 22 October 2026.</p>
+          <p>A general event platform with an autism-friendly events category.</p>
+          <ul>
+            <li>Cards show an image, date, time, location, organiser and lowest price.</li>
+            <li>Results filter by date, price, format and language only.</li>
+            <li>There is no noise, lighting or performance type filter.</li>
+          </ul>
+        </div>
+      </div>
+      <p class="gap-note"><strong>The gap:</strong> neither one lets a performer filter sessions by noise, lighting and performance type.</p>
+      <h3>How they cope today</h3>
+      <p>Without that information, performers email the venue, send a friend to check, or skip the event.</p>
+    </section>
+
+    <!-- ================= 7. HOW IT IS PAID FOR ================= -->
+    <section id="paid" aria-labelledby="paid-heading">
+      <h2 id="paid-heading" class="sparkle-heading">How it is paid for</h2>
+      <div class="pay">
+        <div class="panel">
+          <h3>Performers</h3>
+          <p class="price">Free</p>
+          <p>Performers use Softstage at no cost.</p>
+        </div>
+        <div class="panel">
+          <h3>Clubs and organisers</h3>
+          <p class="price">&euro;30 a month</p>
+          <p>Inclusive arts clubs and organisers pay a small monthly listing fee, because it helps them reach performers who would otherwise stay away.</p>
+          <p><span class="assume">Assumption, not a verified price</span></p>
+        </div>
+      </div>
+      <p>The &euro;30 a month figure is an assumption made for this project. It has not been checked with any real club.</p>
+    </section>
+
+    <!-- ================= 8. TESTED WITH REAL PEOPLE ================= -->
+    <section id="testers" aria-labelledby="testers-heading">
+      <h2 id="testers-heading" class="sparkle-heading">What testers said</h2>
+      <!--
+        PLACEHOLDER TO REPLACE LATER: write the real findings here.
+        For each tester (keep them anonymous, for example "Tester 1: a friend, on a phone"), say:
+          - what they tried
+          - what broke or confused them
+          - what was changed because of it
+        Do not invent any feedback. If a tester found nothing wrong, say that.
+      -->
+      <div class="testers">
+        <p>Testing is under way. This section will be updated with what each tester tried, what broke or confused them, and what was changed because of it.</p>
+      </div>
+    </section>
+
+    <!-- ================= 9. OPTIONAL SIGN-UP ================= -->
+    <section id="signup" aria-labelledby="signup-heading">
+      <h2 id="signup-heading" class="sparkle-heading">Join the waiting list</h2>
+      <p>Want to hear when Softstage opens to new sessions? Add your email below. Softstage is fictional, so there is no real list. The form shows how it would behave, and it does not send or save anything.</p>
+
+      <div id="signup-thanks" class="thanks" role="status" tabindex="-1" hidden>
+        <p class="thanks-emoji deco" aria-hidden="true">&#10024; &#128588; &#10024;</p>
+        <h3>Ta-da! Thank you!</h3>
+        <p>You are on the made-up waiting list. Nothing was sent or saved, and the box has been cleared.</p>
+      </div>
+
+      <form id="signup-form" class="panel" novalidate autocomplete="off">
+        <p class="note-box" id="signup-note"><strong>This is a fictional project. Please do not enter a real email address.</strong></p>
+        <div id="signup-error" class="errors" role="alert" tabindex="-1" hidden></div>
+        <div class="field">
+          <label class="lbl" for="signup-email">Email address (made-up only)</label>
+          <input type="email" id="signup-email" autocomplete="off" aria-describedby="signup-note">
+        </div>
+        <button type="submit" class="btn btn-large">Join the waiting list</button>
+      </form>
+    </section>
+
+  </main>
+
+  <!-- ================= 10. FOOTER ================= -->
+  <footer class="site-footer">
+    <p>Softstage is a fictional company made up for a student project. The sessions, venues, quote and price on this page are invented, and the sessions are Sample Data. Euan's Guide and Eventbrite are real sites. Nothing on this page collects or sends any data.</p>
+    <p>Picture credits: every picture on this page is a simple illustration drawn for this project in code. No photographs, logos or third-party images are used.</p>
+    <p>Comparisons checked on 22 October 2026. Those sites may have changed since.</p>
+    <p class="closing">Softstage: a dimmer switch for the world</p>
+  </footer>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* Calm mode is remembered under the same name as the demo page,
+     so one choice carries across both Softstage pages. */
+  var CALM_KEY = 'softstageDemo.calm.v1';
+  var STAR = 'M10 0Q10.9 9.1 20 10Q10.9 10.9 10 20Q9.1 10.9 0 10Q9.1 9.1 10 0Z';
+
+  function $(id) { return document.getElementById(id); }
+
+  /* ---------- Calm mode ---------- */
+  function setCalm(on, remember) {
+    document.body.classList.toggle('calm', on);
+    var b = $('calm-toggle');
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    b.textContent = 'Calm mode: ' + (on ? 'On' : 'Off');
+    if (remember) {
+      try { window.localStorage.setItem(CALM_KEY, on ? '1' : '0'); } catch (e) { /* ignore */ }
+    }
+  }
+
+  /* ---------- Optional sign-up: sends nothing, stores nothing ---------- */
+  function onSignup(e) {
+    e.preventDefault();
+    var input = $('signup-email');
+    var err = $('signup-error');
+    var v = input.value.trim();
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
+      err.textContent = 'Please type a made-up address that looks like name@example.com.';
+      err.hidden = false;
+      input.setAttribute('aria-invalid', 'true');
+      input.setAttribute('aria-describedby', 'signup-note signup-error');
+      err.focus();
+      return;
+    }
+
+    err.hidden = true;
+    input.removeAttribute('aria-invalid');
+    input.setAttribute('aria-describedby', 'signup-note');
+    input.value = '';
+
+    var t = $('signup-thanks');
+    t.hidden = false;
+    t.classList.remove('shimmer');
+    void t.offsetWidth;
+    t.classList.add('shimmer');
+    t.focus();
+  }
+
+  /* ---------- Start-up ---------- */
+  function init() {
+    var tile = "<svg xmlns='http://www.w3.org/2000/svg' width='22' height='120' viewBox='0 0 22 120'>" +
+      "<path transform='translate(4 6) scale(.7)' fill='#d4a017' d='" + STAR + "'/>" +
+      "<circle cx='16' cy='34' r='1.6' fill='#f0cf63'/>" +
+      "<path transform='translate(10 50) scale(.45)' fill='#f0cf63' d='" + STAR + "'/>" +
+      "<circle cx='6' cy='78' r='1.3' fill='#d4a017'/>" +
+      "<path transform='translate(5 92) scale(.55)' fill='#d4a017' d='" + STAR + "'/>" +
+      "<circle cx='17' cy='112' r='1.4' fill='#f0cf63'/></svg>";
+    var star = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'><path fill='#d4a017' d='" + STAR + "'/></svg>";
+    var root = document.documentElement.style;
+    root.setProperty('--sparkle-tile', 'url("data:image/svg+xml,' + encodeURIComponent(tile) + '")');
+    root.setProperty('--star-icon', 'url("data:image/svg+xml,' + encodeURIComponent(star) + '")');
+
+    var calm = false;
+    try { calm = window.localStorage.getItem(CALM_KEY) === '1'; } catch (e) { /* ignore */ }
+    $('calm-toggle').hidden = false;
+    setCalm(calm, false);
+    $('calm-toggle').addEventListener('click', function () { setCalm(!document.body.classList.contains('calm'), true); });
+
+    $('signup-form').addEventListener('submit', onSignup);
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
