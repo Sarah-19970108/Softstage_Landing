@@ -99,6 +99,8 @@ ul, ol { margin: 0 0 1.25em; padding-left: 1.3em; }
 .banner p { margin: 0; max-width: none; }
 
 .topbar { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; justify-content: space-between; margin: 0 0 8px; }
+.topbar-control { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; max-width: 20rem; min-width: 0; }
+.topbar-control .hint { margin: 0; max-width: none; }
 .wordmark { display: inline-flex; align-items: center; gap: 12px; font-size: 1.6rem; font-weight: 700; color: var(--purple-dark); margin: 0; max-width: none; }
 .wordmark svg { display: block; flex: 0 0 auto; }
 
@@ -365,7 +367,10 @@ body.calm .thanks::after { display: none; }
       </svg>
       <span>Softstage</span>
     </p>
-    <button type="button" id="calm-toggle" class="btn btn-secondary" aria-pressed="false" hidden>Calm mode: Off</button>
+    <div class="topbar-control">
+      <button type="button" id="calm-toggle" class="btn btn-secondary" aria-pressed="false" aria-describedby="dimmer-help" hidden>Dimmer switch: Off</button>
+      <p class="hint" id="dimmer-help" hidden>Hit the dimmer switch on this page to turn off the embellishments.</p>
+    </div>
   </div>
 
   <main id="main" tabindex="-1">
@@ -417,7 +422,7 @@ body.calm .thanks::after { display: none; }
                   <svg width="26" height="34" viewBox="0 0 24 32" focusable="false"><use href="#bulb-on"/></svg>
                   <svg width="26" height="34" viewBox="0 0 24 32" focusable="false"><use href="#bulb-off"/></svg>
                 </span>
-                <span class="light-label">Moderate light (2 of 3 bulbs)</span>
+                <span class="light-label">This session has moderate light (2 of 3 bulbs).</span>
               </div>
               <div class="rating">
                 <span class="rating-title">Quiet space</span>
@@ -485,7 +490,7 @@ body.calm .thanks::after { display: none; }
     <section id="how" aria-labelledby="how-heading">
       <h2 id="how-heading" class="sparkle-heading">What it is, and how it works in three steps</h2>
       <p class="section-lead"><strong>Softstage is a listing portal:</strong> a searchable directory of open mic sessions. Performers browse and filter it. Venues add sessions to it and rate them.</p>
-      <p>It is made to be used on a phone: one column, large buttons, plain words, and a Calm mode that switches the sparkle off.</p>
+      <p>It is made to be used on a phone: one column, large buttons, plain words, and a Dimmer switch that turns off the sparkle.</p>
       <ol class="steps" role="list">
         <li class="step">
           <h3><span class="step-num" aria-hidden="true">1</span>Browse session cards</h3>
@@ -493,13 +498,13 @@ body.calm .thanks::after { display: none; }
         </li>
         <li class="step">
           <h3><span class="step-num" aria-hidden="true">2</span>Filter by type, noise and lighting</h3>
-          <p>Choose the performance types you want, then the loudest and brightest you can manage. You can also ask for sessions with a quiet space. Sessions over your limits are hidden.</p>
+          <p>Choose the performance types you want, then the loudest noise level and the brightest lighting level you can manage. You can also ask to see only sessions with a quiet space. Sessions over your limits are hidden.</p>
         </li>
         <li class="step">
           <h3><span class="step-num" aria-hidden="true">3</span>Choose a session and register interest</h3>
           <p>Pick a session that fits and read its details before you decide.</p>
-          <p><span class="status status-planned"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Planned</span></p>
-          <p>Registering interest is not in the demo yet.</p>
+          <p><span class="status status-demo"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>In the demo</span></p>
+          <p>Press Register interest on a session card. The demo shows a thank-you message. Nothing is sent or saved, because Softstage is fictional.</p>
         </li>
       </ol>
       <p><a class="btn btn-large" href="https://sarah-19970108.github.io/Softstage_Demo/">Try the demo</a></p>
@@ -521,17 +526,17 @@ body.calm .thanks::after { display: none; }
         <tbody>
           <tr>
             <th scope="row">1. Noise rating with a clear key</th>
-            <td data-label="How the solution meets it">Every session card shows a green, amber or red pill, and says Low noise, Moderate noise or Lots of noise in words. A noise key at the top of the Performer view explains each colour. If a venue has not supplied a rating, the card says so.</td>
+            <td data-label="How the solution meets it">Every session card shows a green, amber or red pill, and says Low noise, Moderate noise or Lots of noise in words. A noise key at the bottom of the page explains each colour, and a note near the top links to it. If a venue has not given a rating, the card says: The venue has not given this rating yet.</td>
             <td data-label="In the demo or Planned"><span class="status status-demo"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>In the demo</span></td>
           </tr>
           <tr>
             <th scope="row">2. Lighting rating with a clear key</th>
-            <td data-label="How the solution meets it">Every session card shows one, two or three lit bulbs with a plain label, such as Low light (1 of 3 bulbs). A lighting key explains each level, including that three bulbs can mean flashing or changing light.</td>
+            <td data-label="How the solution meets it">Every session card shows one, two or three lit bulbs with a plain sentence, such as This session has low light (1 of 3 bulbs). A lighting key explains each level, including that three bulbs can mean flashing or changing light.</td>
             <td data-label="In the demo or Planned"><span class="status status-demo"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>In the demo</span></td>
           </tr>
           <tr>
             <th scope="row">3. Filter by performance type, noise and lighting together</th>
-            <td data-label="How the solution meets it">Tick the performance types you want, then choose the loudest and brightest you can manage. All three apply at once, and you can add Only show sessions with a quiet space. If nothing fits, a message says so and offers a Clear filters button. While a limit is set, sessions with missing details are hidden, and a note says how many.</td>
+            <td data-label="How the solution meets it">Tick the performance types you want, then choose the loudest noise level and the brightest lighting level you can manage. All three apply at once, and you can add Only show sessions with a quiet space. If nothing fits, a message says so and offers a Clear filters button. While a limit is set, sessions with missing details are hidden, and a note says how many.</td>
             <td data-label="In the demo or Planned"><span class="status status-demo"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>In the demo</span></td>
           </tr>
           <tr>
@@ -606,16 +611,11 @@ body.calm .thanks::after { display: none; }
     <!-- ================= 8. TESTED WITH REAL PEOPLE ================= -->
     <section id="testers" aria-labelledby="testers-heading">
       <h2 id="testers-heading" class="sparkle-heading">What testers said</h2>
-      <!--
-        PLACEHOLDER TO REPLACE LATER: write the real findings here.
-        For each tester (keep them anonymous, for example "Tester 1: a friend, on a phone"), say:
-          - what they tried
-          - what broke or confused them
-          - what was changed because of it
-        Do not invent any feedback. If a tester found nothing wrong, say that.
-      -->
       <div class="testers">
-        <p>Testing is under way. This section will be updated with what each tester tried, what broke or confused them, and what was changed because of it.</p>
+        <p>Tester 1, who works in IT, tried to break the demo on purpose. He added a session of his own through the venue form, and it saved and showed up as it should, including after the filters were cleared. He also tried typing code into the form, and none of it ran. Nothing broke when the demo was used the normal way. He did point out four small weak spots in the code. They only matter if someone gets around the form or edits the saved data by hand. These four have now been fixed. His review was informal and he wrote it with AI help, so it is not a security audit.</p>
+        <p>Tester 2 tried the demo and sent her feedback by text message. She liked the ratings and the listings: "The ratings are class they're absolutely brilliant" and "The listings themselves are fantastically done". She also liked the detail where it says "sessions hidden because we don't know if they got your parameters". She found two things unclear. Some of the explanations were "a bit unclear", and she said "If you had fuller sentences the whole way through that would be much better." She also did not understand the line "Travel forward in time: see what happens when a session's details are still missing", and wrote "I have no idea what that means for example". She also made two suggestions. She said the info on how to navigate the site "should maybe be at the bottom of the page", with a note saying "See below for icon details or smth". She also wrote "Would be good if there was a link to book".</p>
+        <p>Because of this, every explanation in the demo has been rewritten as full sentences. The line she did not understand now reads: "Choose a later date to pretend it is today. Sessions that still have details missing will show a warning as the date gets closer." The key that explains the colours and symbols now sits at the bottom of the page, with a note near the top that links to it. Each upcoming session card also has a Register interest button, which shows a thank-you message. Nothing is sent or saved, because Softstage is fictional.</p>
+        <p>More feedback to come.</p>
       </div>
     </section>
 
@@ -668,7 +668,7 @@ body.calm .thanks::after { display: none; }
     document.body.classList.toggle('calm', on);
     var b = $('calm-toggle');
     b.setAttribute('aria-pressed', on ? 'true' : 'false');
-    b.textContent = 'Calm mode: ' + (on ? 'On' : 'Off');
+    b.textContent = 'Dimmer switch: ' + (on ? 'On' : 'Off');
     if (remember) {
       try { window.localStorage.setItem(CALM_KEY, on ? '1' : '0'); } catch (e) { /* ignore */ }
     }
@@ -720,6 +720,7 @@ body.calm .thanks::after { display: none; }
     var calm = false;
     try { calm = window.localStorage.getItem(CALM_KEY) === '1'; } catch (e) { /* ignore */ }
     $('calm-toggle').hidden = false;
+    $('dimmer-help').hidden = false;
     setCalm(calm, false);
     $('calm-toggle').addEventListener('click', function () { setCalm(!document.body.classList.contains('calm'), true); });
 
