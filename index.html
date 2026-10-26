@@ -127,6 +127,9 @@ section { margin: 0 0 56px; }
 .btn-secondary { background: #fff; color: var(--purple-dark); }
 .btn-secondary:hover { background: var(--pink-pale); color: var(--purple-dark); border-color: var(--purple); }
 .btn-large { min-height: 56px; padding: 10px 32px; font-size: 1.2rem; }
+/* The Register interest button on the example card is part of the picture: it looks like the demo's button but is not a button or a link. */
+.card-interest { margin: 0; }
+.card-interest-btn { width: 100%; cursor: default; pointer-events: none; user-select: none; }
 .cta-note { margin: 12px 0 0; font-size: 1rem; color: var(--ink-soft); }
 
 /* ================= Hero ================= */
@@ -429,6 +432,7 @@ body.calm .thanks::after { display: none; }
                 <span class="quiet-chip"><svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><circle cx="24" cy="24" r="22" fill="#4a1d6e"/><circle cx="16.5" cy="14.5" r="2.4" fill="#ffffff"/><circle cx="31.5" cy="14.5" r="2.4" fill="#ffffff"/><g transform="translate(19.5 21.5) rotate(-32)"><path d="M-3.4 12L-3.4 3a2.4 2.4 0 0 1 4.8 0L1.4 8.2L7 8.6a3 3 0 0 1 3 3L10 17a4 4 0 0 1-4 4L-1 21a4 4 0 0 1-4-4Z" fill="#ffffff"/><path d="M3.2 12.2v3.6M6.4 12.2v3.6" fill="none" stroke="#4a1d6e" stroke-width="1.2" stroke-linecap="round"/></g></g></svg><span>Available</span></span>
               </div>
             </div>
+            <div class="card-interest" aria-hidden="true"><span class="btn card-interest-btn">Register interest</span></div>
           </div>
         </article>
         <figcaption>An example session card from the demo. The session is invented Sample Data.</figcaption>
